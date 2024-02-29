@@ -22,19 +22,21 @@ import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.balan.calculator.ui.theme.Black40
+import androidx.core.text.isDigitsOnly
+import com.balan.calculator.ui.theme.BackGround
+import com.balan.calculator.ui.theme.LocalDimen
+import com.balan.calculator.ui.theme.LocalProperty
 import com.balan.calculator.ui.theme.Orange
+import com.balan.calculator.ui.theme.Turquoise
 
 @Composable
-fun NewCalculator(modifier: Modifier = Modifier, button: () -> Unit, number: String) {
+fun CalculatorNumber(button: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Box(modifier.fillMaxWidth()) {
         Button(
-            onClick = { button() },
-            modifier
+            onClick = onClick,
+            Modifier
                 .fillMaxWidth()
-                .padding(4.dp),
+                .padding(LocalDimen.current.buttonPadding),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Orange,
                 contentColor = White
@@ -42,45 +44,73 @@ fun NewCalculator(modifier: Modifier = Modifier, button: () -> Unit, number: Str
             shape = MaterialTheme.shapes.extraLarge,
         ) {
             Text(
-                number,
-                fontSize = 28.sp,
+                text = button,
+                fontSize = LocalDimen.current.buttonTextSize,
                 fontWeight = FontWeight.Black
             )
         }
     }
 }
 
+@Composable
+fun CalculatorText(button: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Box(modifier.fillMaxWidth()) {
+        Button(
+            onClick = onClick,
+            Modifier
+                .fillMaxWidth()
+                .padding(LocalDimen.current.buttonPadding),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Turquoise,
+                contentColor = White
+            ),
+            shape = MaterialTheme.shapes.extraLarge,
+        ) {
+            Text(
+                text = button,
+                fontSize = LocalDimen.current.buttonTextSize,
+                fontWeight = FontWeight.Black
+            )
+        }
+    }
+}
+
+
 @Preview(showSystemUi = true)
 @Composable
-fun CalculatorApp(modifier: Modifier = Modifier) {
+fun MainScreen() {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
-            .background(color = Black40),
+            .background(color = BackGround),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Bottom
     ) {
         Text(
             text = "",
-            fontSize = 28.sp,
+            fontSize = LocalDimen.current.resultTextSize,
             fontWeight = FontWeight.Black,
             color = White,
             textAlign = TextAlign.Center,
-            modifier = modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         )
         Text(
             text = "",
-            fontSize = 18.sp,
+            fontSize = LocalDimen.current.buttonTextSize,
             fontWeight = FontWeight.Black,
             textAlign = TextAlign.End,
             color = White,
-            modifier = modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         )
-        Spacer(modifier = modifier.padding(top = 100.dp))
+        Spacer(modifier = Modifier.padding(top = LocalDimen.current.spaceBetween))
 
-        LazyVerticalGrid(GridCells.Fixed(4)) {
+        LazyVerticalGrid(GridCells.Fixed(LocalProperty.current.count)) {
             items(list) { element ->
-                NewCalculator(button = {}, number = element)
+                if (element.isDigitsOnly()) {
+                    CalculatorNumber(button = element, onClick = {})
+                } else {
+                    CalculatorText(button = element, onClick = {})
+                }
             }
         }
     }
