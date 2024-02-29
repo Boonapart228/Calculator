@@ -23,14 +23,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.text.isDigitsOnly
-import com.balan.calculator.ui.theme.BackGround
+import com.balan.calculator.ui.theme.Background
 import com.balan.calculator.ui.theme.LocalDimen
 import com.balan.calculator.ui.theme.LocalProperty
 import com.balan.calculator.ui.theme.Orange
 import com.balan.calculator.ui.theme.Turquoise
 
 @Composable
-fun CalculatorNumber(button: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun CalculatorNumber(number: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Box(modifier.fillMaxWidth()) {
         Button(
             onClick = onClick,
@@ -44,7 +44,7 @@ fun CalculatorNumber(button: String, onClick: () -> Unit, modifier: Modifier = M
             shape = MaterialTheme.shapes.extraLarge,
         ) {
             Text(
-                text = button,
+                text = number,
                 fontSize = LocalDimen.current.buttonTextSize,
                 fontWeight = FontWeight.Black
             )
@@ -53,7 +53,7 @@ fun CalculatorNumber(button: String, onClick: () -> Unit, modifier: Modifier = M
 }
 
 @Composable
-fun CalculatorText(button: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun CalculatorText(action: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Box(modifier.fillMaxWidth()) {
         Button(
             onClick = onClick,
@@ -67,7 +67,7 @@ fun CalculatorText(button: String, onClick: () -> Unit, modifier: Modifier = Mod
             shape = MaterialTheme.shapes.extraLarge,
         ) {
             Text(
-                text = button,
+                text = action,
                 fontSize = LocalDimen.current.buttonTextSize,
                 fontWeight = FontWeight.Black
             )
@@ -82,7 +82,7 @@ fun MainScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = BackGround),
+            .background(color = Background),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Bottom
     ) {
@@ -104,19 +104,19 @@ fun MainScreen() {
         )
         Spacer(modifier = Modifier.padding(top = LocalDimen.current.spaceBetween))
 
-        LazyVerticalGrid(GridCells.Fixed(LocalProperty.current.count)) {
-            items(list) { element ->
+        LazyVerticalGrid(columns = GridCells.Fixed(count = LocalProperty.current.columnCount)) {
+            items(buttonsText) { element ->
                 if (element.isDigitsOnly()) {
-                    CalculatorNumber(button = element, onClick = {})
+                    CalculatorNumber(number = element, onClick = {})
                 } else {
-                    CalculatorText(button = element, onClick = {})
+                    CalculatorText(action = element, onClick = {})
                 }
             }
         }
     }
 }
 
-val list = listOf(
+val buttonsText = listOf(
     "C",
     "Del",
     "%",

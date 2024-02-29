@@ -7,10 +7,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 val LocalDimen = compositionLocalOf {
-    Dimension()
+    Dimensions()
 }
 
-data class Dimension(
+data class Dimensions(
     val buttonTextSize: TextUnit = 24.sp,
     val numberTextSize: TextUnit = 18.sp,
     val resultTextSize: TextUnit = 28.sp,

@@ -3,9 +3,9 @@ package com.balan.calculator.ui.theme
 import androidx.compose.runtime.compositionLocalOf
 
 val LocalProperty = compositionLocalOf {
-    Property()
+    Properties()
 }
 
-data class Property(
-   val count: Int = 4
+data class Properties(
+   val columnCount: Int = 4
 )
