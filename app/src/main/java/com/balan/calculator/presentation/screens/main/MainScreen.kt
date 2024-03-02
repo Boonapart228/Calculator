@@ -16,6 +16,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color.Companion.White
@@ -23,6 +25,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.text.isDigitsOnly
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.balan.calculator.domain.model.buttonsText
 import com.balan.calculator.ui.theme.Background
 import com.balan.calculator.ui.theme.LocalDimen
 import com.balan.calculator.ui.theme.LocalProperty
@@ -79,6 +83,8 @@ fun CalculatorText(action: String, onClick: () -> Unit, modifier: Modifier = Mod
 @Preview(showSystemUi = true)
 @Composable
 fun MainScreen() {
+    val viewModel : MainViewModel = hiltViewModel()
+    val state by viewModel.state.collectAsState()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -87,7 +93,7 @@ fun MainScreen() {
         verticalArrangement = Arrangement.Bottom
     ) {
         Text(
-            text = "",
+            text = state.expression,
             fontSize = LocalDimen.current.resultTextSize,
             fontWeight = FontWeight.Black,
             color = White,
@@ -95,7 +101,7 @@ fun MainScreen() {
             modifier = Modifier.fillMaxWidth()
         )
         Text(
-            text = "",
+            text = state.expression,
             fontSize = LocalDimen.current.buttonTextSize,
             fontWeight = FontWeight.Black,
             textAlign = TextAlign.End,
@@ -107,34 +113,11 @@ fun MainScreen() {
         LazyVerticalGrid(columns = GridCells.Fixed(count = LocalProperty.current.columnCount)) {
             items(buttonsText) { element ->
                 if (element.isDigitsOnly()) {
-                    CalculatorNumber(number = element, onClick = {})
+                    CalculatorNumber(number = element, onClick = {viewModel.addNumber(element)})
                 } else {
-                    CalculatorText(action = element, onClick = {})
+                    CalculatorText(action = element, onClick = {viewModel.onClick(element)})
                 }
             }
         }
     }
 }
-
-val buttonsText = listOf(
-    "C",
-    "Del",
-    "%",
-    "C8",
-    "7",
-    "8",
-    "9",
-    "+",
-    "4",
-    "5",
-    "6",
-    "-",
-    "1",
-    "2",
-    "3",
-    "/",
-    ".",
-    "0",
-    "=",
-    "*"
-)
