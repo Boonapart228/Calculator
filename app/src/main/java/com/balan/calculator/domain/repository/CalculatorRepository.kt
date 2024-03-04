@@ -7,10 +7,9 @@ interface CalculatorRepository {
 
     fun clear()
 
-    fun delete(): String
+    fun delete()
 
     fun addPercent()
-
     fun addPlus()
     fun addMinus()
     fun addDivision()

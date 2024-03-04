@@ -1,11 +1,10 @@
 package com.balan.calculator.data
 
-import androidx.annotation.StringRes
 import com.balan.calculator.R
+import com.balan.calculator.data.exeption.ArithmeticalException
 import com.balan.calculator.domain.repository.CalculatorRepository
 import java.util.Stack
 
-class MyCustomException(@StringRes val messageResId: Int) : Exception()
 
 class CalculatorRepositoryImpl() : CalculatorRepository {
     companion object {
@@ -16,10 +15,11 @@ class CalculatorRepositoryImpl() : CalculatorRepository {
         const val DIVISION = '/'
         const val DOT = '.'
         const val MULTIPLY = '*'
-        const val ZERO_DOUBLE = 0.0
         const val ZERO = 0
         const val ONE = 1
+        const val COUNT_ELEMENT = 1
         const val TWO = 2
+        const val RESULT_FORMAT = "%.2f"
     }
 
     private var expression = CLEAR
@@ -35,9 +35,8 @@ class CalculatorRepositoryImpl() : CalculatorRepository {
         expression = CLEAR
     }
 
-    override fun delete(): String {
-        expression = expression.dropLast(1)
-        return expression
+    override fun delete() {
+        expression = expression.dropLast(COUNT_ELEMENT)
     }
 
     override fun addPercent() {
@@ -65,82 +64,83 @@ class CalculatorRepositoryImpl() : CalculatorRepository {
     }
 
     override fun getResult(): Double {
-        val operators = mapOf('+' to 1, '-' to 1, '*' to 2, '/' to 2, '%' to 2)
+        val outputQueue = convertToPostfix(expression)
+        val result = evaluatePostfix(outputQueue)
+        expression = String.format(RESULT_FORMAT, result)
+        return result
+    }
+
+    private fun convertToPostfix(infixExpression: String): List<String> {
+        val operatorsPrecedence = mapOf(PLUS to ONE, MINUS to ONE, MULTIPLY to TWO, DIVISION to TWO, PERCENT to TWO)
         val outputQueue = mutableListOf<String>()
         val operatorStack = Stack<Char>()
-
-        var numberBuffer = StringBuilder()
+        val numberBuffer = StringBuilder()
         var isNegativeNumber = false
 
-        for (char in expression) {
+        infixExpression.forEach { char ->
             when {
-                char.isDigit() || char == '.' -> numberBuffer.append(char)
-                char == '-' && numberBuffer.isEmpty() -> isNegativeNumber = true
-                operators.keys.contains(char) -> {
-                    if (numberBuffer.isNotEmpty()) {
-                        if (isNegativeNumber) {
-                            numberBuffer.insert(0, '-')
-                            isNegativeNumber = false
-                        }
-                        outputQueue.add(numberBuffer.toString())
-                        numberBuffer.clear()
-                    }
+                char.isDigit() || char == DOT -> numberBuffer.append(char)
+                char == MINUS && numberBuffer.isEmpty() -> isNegativeNumber = true
+                operatorsPrecedence.keys.contains(char) -> {
+                    processNumberBuffer(numberBuffer, isNegativeNumber, outputQueue)
                     while (operatorStack.isNotEmpty() &&
-                        operators[operatorStack.peek()]!! >= operators[char]!!) {
+                        operatorsPrecedence[operatorStack.peek()]!! >= operatorsPrecedence[char]!!) {
                         outputQueue.add(operatorStack.pop().toString())
                     }
                     operatorStack.push(char)
                 }
                 char == '(' -> operatorStack.push(char)
                 char == ')' -> {
-                    if (numberBuffer.isNotEmpty()) {
-                        outputQueue.add(numberBuffer.toString())
-                        numberBuffer.clear()
-                    }
+                    processNumberBuffer(numberBuffer, isNegativeNumber, outputQueue)
                     while (operatorStack.peek() != '(') {
                         outputQueue.add(operatorStack.pop().toString())
                     }
-                    operatorStack.pop() // remove '('
+                    operatorStack.pop()
                 }
             }
         }
-
-        if (numberBuffer.isNotEmpty()) {
-            if (isNegativeNumber) {
-                numberBuffer.insert(0, '-')
-            }
-            outputQueue.add(numberBuffer.toString())
-        }
-
+        processNumberBuffer(numberBuffer, isNegativeNumber, outputQueue)
         while (operatorStack.isNotEmpty()) {
             outputQueue.add(operatorStack.pop().toString())
         }
+        return outputQueue
+    }
 
+    private fun processNumberBuffer(numberBuffer: StringBuilder, isNegative: Boolean, outputQueue: MutableList<String>) {
+        if (numberBuffer.isNotEmpty()) {
+            if (isNegative) {
+                numberBuffer.insert(ZERO, MINUS)
+            }
+            outputQueue.add(numberBuffer.toString())
+            numberBuffer.clear()
+        }
+    }
+
+    private fun evaluatePostfix(postfixExpression: List<String>): Double {
         val stack = Stack<Double>()
 
-        for (token in outputQueue) {
+        postfixExpression.forEach { token ->
             if (token.isNumeric()) {
                 stack.push(token.toDouble())
             } else {
                 val b = stack.pop()
                 val a = stack.pop()
                 val result = when (token) {
-                    "+" -> a + b
-                    "-" -> a - b
-                    "*" -> a * b
-                    "/" -> {
-                        if (b == 0.0) {
-                            throw MyCustomException(R.string.division_by_zero_error)
+                    PLUS.toString() -> a + b
+                    MINUS.toString() -> a - b
+                    MULTIPLY.toString() -> a * b
+                    DIVISION.toString() -> {
+                        if (b == ZERO.toDouble()) {
+                            throw ArithmeticalException(R.string.division_by_zero_error)
                         }
                         a / b
                     }
-                    "%" -> a % b
-                    else -> throw MyCustomException(R.string.operation_error)
+                    PERCENT.toString() -> a % b
+                    else -> throw ArithmeticalException(R.string.operation_error)
                 }
                 stack.push(result)
             }
         }
-        expression = String.format("%.2f", stack.peek())
         return stack.pop()
     }
 
