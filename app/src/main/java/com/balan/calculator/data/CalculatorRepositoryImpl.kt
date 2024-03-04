@@ -3,14 +3,15 @@ package com.balan.calculator.data
 import com.balan.calculator.R
 import com.balan.calculator.data.exeption.ArithmeticalException
 import com.balan.calculator.domain.repository.CalculatorRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.Stack
 
 
-class CalculatorRepositoryImpl() : CalculatorRepository {
+class CalculatorRepositoryImpl : CalculatorRepository {
     companion object {
         const val PLUS = '+'
         const val MINUS = '-'
-        const val CLEAR = ""
         const val PERCENT = '%'
         const val DIVISION = '/'
         const val DOT = '.'
@@ -22,51 +23,51 @@ class CalculatorRepositoryImpl() : CalculatorRepository {
         const val RESULT_FORMAT = "%.2f"
     }
 
-    private var expression = CLEAR
+    private var expression  = MutableStateFlow("")
     override fun addNumber(number: String) {
-        expression += number
+        expression.value += number
     }
 
-    override fun getExpression(): String {
-        return expression
-    }
+    override fun getExpression():Flow<String> = expression
+
+
 
     override fun clear() {
-        expression = CLEAR
+        expression.value = ""
     }
 
     override fun delete() {
-        expression = expression.dropLast(COUNT_ELEMENT)
+        expression.value = expression.value.dropLast(COUNT_ELEMENT)
     }
 
     override fun addPercent() {
-        expression += PERCENT
+        expression.value += PERCENT
     }
 
     override fun addPlus() {
-        expression += PLUS
+        expression.value += PLUS
     }
 
     override fun addMinus() {
-        expression += MINUS
+        expression.value += MINUS
     }
 
     override fun addDivision() {
-        expression += DIVISION
+        expression.value += DIVISION
     }
 
     override fun addDot() {
-        expression += DOT
+        expression.value += DOT
     }
 
     override fun addMultiply() {
-        expression += MULTIPLY
+        expression.value += MULTIPLY
     }
 
     override fun getResult(): Double {
-        val outputQueue = convertToPostfix(expression)
+        val outputQueue = convertToPostfix(expression.value)
         val result = evaluatePostfix(outputQueue)
-        expression = String.format(RESULT_FORMAT, result)
+        expression.value = String.format(RESULT_FORMAT, result)
         return result
     }
 

@@ -2,13 +2,15 @@ package com.balan.calculator.presentation.screens.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.balan.calculator.data.CalculatorRepositoryImpl.Companion.CLEAR
 import com.balan.calculator.data.exeption.ArithmeticalException
 import com.balan.calculator.domain.model.ButtonText
 import com.balan.calculator.domain.repository.CalculatorRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -21,6 +23,13 @@ class CalculatorViewModel @Inject constructor(
         MutableStateFlow(CalculatorState())
     val state = _state.asStateFlow()
 
+    init {
+        CoroutineScope(Dispatchers.IO).launch {
+            calculatorRepository.getExpression().distinctUntilChangedBy { it }
+                .collect { setExpression(it) }
+        }
+    }
+
     private fun setExpression(expression: String) {
         _state.update {
             it.copy(expression = expression, errorMessage = null)
@@ -29,55 +38,39 @@ class CalculatorViewModel @Inject constructor(
 
     fun addNumber(number: String) {
         calculatorRepository.addNumber(number)
-        val expression = calculatorRepository.getExpression()
-        setExpression(expression)
     }
 
     private fun clear() {
         calculatorRepository.clear()
-        setExpression(CLEAR)
+
     }
 
     private fun deleteLastElement() {
         calculatorRepository.delete()
-        val expression = calculatorRepository.getExpression()
-        setExpression(expression)
     }
 
     private fun percent() {
         calculatorRepository.addPercent()
-        val expression = calculatorRepository.getExpression()
-        setExpression(expression)
     }
 
     private fun plus() {
         calculatorRepository.addPlus()
-        val expression = calculatorRepository.getExpression()
-        setExpression(expression)
     }
 
     private fun minus() {
         calculatorRepository.addMinus()
-        val expression = calculatorRepository.getExpression()
-        setExpression(expression)
     }
 
     private fun division() {
         calculatorRepository.addDivision()
-        val expression = calculatorRepository.getExpression()
-        setExpression(expression)
     }
 
     private fun dot() {
         calculatorRepository.addDot()
-        val expression = calculatorRepository.getExpression()
-        setExpression(expression)
     }
 
     private fun multiply() {
         calculatorRepository.addMultiply()
-        val expression = calculatorRepository.getExpression()
-        setExpression(expression)
     }
 
     private fun result() {
