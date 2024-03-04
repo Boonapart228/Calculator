@@ -1,6 +1,5 @@
 package com.balan.calculator.domain.repository
 
-
 interface CalculatorRepository {
     fun addNumber(number: String)
 
@@ -8,7 +7,7 @@ interface CalculatorRepository {
 
     fun clear()
 
-    fun del(): String
+    fun delete(): String
 
     fun addPercent()
 
@@ -20,5 +19,5 @@ interface CalculatorRepository {
 
     fun addMultiply()
 
-    fun getResult() : String
+    fun getResult(): Double
 }

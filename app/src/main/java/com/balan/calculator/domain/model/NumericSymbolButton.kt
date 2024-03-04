@@ -1,9 +1,5 @@
 package com.balan.calculator.domain.model
 
-data class NumericSymbolButtonState(
-    val expression : String = ""
-)
-
 val buttonsText = listOf(
     "C",
     "Del",

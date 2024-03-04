@@ -1,9 +1,28 @@
 package com.balan.calculator.data
 
+import androidx.annotation.StringRes
+import com.balan.calculator.R
 import com.balan.calculator.domain.repository.CalculatorRepository
+import java.util.Stack
 
-class CalculatorRepositoryImpl : CalculatorRepository {
-    private var expression = ""
+class MyCustomException(@StringRes val messageResId: Int) : Exception()
+
+class CalculatorRepositoryImpl() : CalculatorRepository {
+    companion object {
+        const val PLUS = '+'
+        const val MINUS = '-'
+        const val CLEAR = ""
+        const val PERCENT = '%'
+        const val DIVISION = '/'
+        const val DOT = '.'
+        const val MULTIPLY = '*'
+        const val ZERO_DOUBLE = 0.0
+        const val ZERO = 0
+        const val ONE = 1
+        const val TWO = 2
+    }
+
+    private var expression = CLEAR
     override fun addNumber(number: String) {
         expression += number
     }
@@ -13,73 +32,125 @@ class CalculatorRepositoryImpl : CalculatorRepository {
     }
 
     override fun clear() {
-        expression = ""
+        expression = CLEAR
     }
 
-    override fun del() : String {
+    override fun delete(): String {
         expression = expression.dropLast(1)
         return expression
     }
 
     override fun addPercent() {
-        expression += "%"
+        expression += PERCENT
     }
 
     override fun addPlus() {
-        expression += "+"
+        expression += PLUS
     }
 
     override fun addMinus() {
-        expression += "-"
+        expression += MINUS
     }
 
     override fun addDivision() {
-        expression += "/"
+        expression += DIVISION
     }
 
     override fun addDot() {
-        expression += "."
+        expression += DOT
     }
-   override fun addMultiply(){
-       expression += "*"
-   }
 
-    override fun getResult(): String {
-        if (expression.isEmpty()) {
-            return "0.0"
-        }
-        val operators = listOf('+', '-', '*', '/', '%')
-        val currentNumber = StringBuilder()
-        var currentOperator = '+'
-        var result = 0.0
-        if(expression.last() in operators){
-            return "0.0"
-        }
-        for ((index, char) in expression.withIndex()) {
-            if (char.isDigit() || (char == '.' && currentNumber.isNotEmpty()) ||
-                (char == '-' && (index == 0 || operators.contains(expression[index - 1])))) {
-                currentNumber.append(char)
-            } else if (operators.contains(char)) {
-                if (currentOperator == '/' && currentNumber.toString().toDouble() == 0.0) {
-                    throw ArithmeticException("Ділення на нуль неможливе")
+    override fun addMultiply() {
+        expression += MULTIPLY
+    }
+
+    override fun getResult(): Double {
+        val operators = mapOf('+' to 1, '-' to 1, '*' to 2, '/' to 2, '%' to 2)
+        val outputQueue = mutableListOf<String>()
+        val operatorStack = Stack<Char>()
+
+        var numberBuffer = StringBuilder()
+        var isNegativeNumber = false
+
+        for (char in expression) {
+            when {
+                char.isDigit() || char == '.' -> numberBuffer.append(char)
+                char == '-' && numberBuffer.isEmpty() -> isNegativeNumber = true
+                operators.keys.contains(char) -> {
+                    if (numberBuffer.isNotEmpty()) {
+                        if (isNegativeNumber) {
+                            numberBuffer.insert(0, '-')
+                            isNegativeNumber = false
+                        }
+                        outputQueue.add(numberBuffer.toString())
+                        numberBuffer.clear()
+                    }
+                    while (operatorStack.isNotEmpty() &&
+                        operators[operatorStack.peek()]!! >= operators[char]!!) {
+                        outputQueue.add(operatorStack.pop().toString())
+                    }
+                    operatorStack.push(char)
                 }
-                result = performOperation(result, currentNumber.toString().toDouble(), currentOperator)
-                currentOperator = char
-                currentNumber.clear()
+                char == '(' -> operatorStack.push(char)
+                char == ')' -> {
+                    if (numberBuffer.isNotEmpty()) {
+                        outputQueue.add(numberBuffer.toString())
+                        numberBuffer.clear()
+                    }
+                    while (operatorStack.peek() != '(') {
+                        outputQueue.add(operatorStack.pop().toString())
+                    }
+                    operatorStack.pop() // remove '('
+                }
             }
         }
-        // Обробка останньої частини виразу
-        result = performOperation(result, currentNumber.toString().toDouble(), currentOperator)
-        return result.toString()
+
+        if (numberBuffer.isNotEmpty()) {
+            if (isNegativeNumber) {
+                numberBuffer.insert(0, '-')
+            }
+            outputQueue.add(numberBuffer.toString())
+        }
+
+        while (operatorStack.isNotEmpty()) {
+            outputQueue.add(operatorStack.pop().toString())
+        }
+
+        val stack = Stack<Double>()
+
+        for (token in outputQueue) {
+            if (token.isNumeric()) {
+                stack.push(token.toDouble())
+            } else {
+                val b = stack.pop()
+                val a = stack.pop()
+                val result = when (token) {
+                    "+" -> a + b
+                    "-" -> a - b
+                    "*" -> a * b
+                    "/" -> {
+                        if (b == 0.0) {
+                            throw MyCustomException(R.string.division_by_zero_error)
+                        }
+                        a / b
+                    }
+                    "%" -> a % b
+                    else -> throw MyCustomException(R.string.operation_error)
+                }
+                stack.push(result)
+            }
+        }
+        expression = String.format("%.2f", stack.peek())
+        return stack.pop()
     }
-    fun performOperation(left: Double, right: Double, operator: Char): Double {
-        return when (operator) {
-            '+' -> left + right
-            '-' -> left - right
-            '*' -> left * right
-            '/' -> left / right
-            '%' -> left % right
-            else -> throw IllegalArgumentException("Невідомий оператор")
+
+    private fun String.isNumeric(): Boolean {
+        return try {
+            this.toDouble()
+            true
+        } catch (e: NumberFormatException) {
+            false
         }
     }
+
 }
