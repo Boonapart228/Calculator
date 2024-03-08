@@ -2,12 +2,10 @@ package com.balan.calculator.presentation.screens.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.balan.calculator.data.exeption.ArithmeticalException
-import com.balan.calculator.domain.model.ButtonText
+import com.balan.calculator.domain.model.CalculatorButtons
 import com.balan.calculator.domain.repository.CalculatorRepository
+import com.balan.calculator.presentation.exeption.CalculatorArithmeticalException
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChangedBy
@@ -24,7 +22,7 @@ class CalculatorViewModel @Inject constructor(
     val state = _state.asStateFlow()
 
     init {
-        CoroutineScope(Dispatchers.IO).launch {
+       viewModelScope.launch {
             calculatorRepository.getExpression().distinctUntilChangedBy { it }
                 .collect { setExpression(it) }
         }
@@ -36,42 +34,10 @@ class CalculatorViewModel @Inject constructor(
         }
     }
 
-    fun addNumber(number: String) {
+    fun onNumberClick(number: String) {
         calculatorRepository.addNumber(number)
     }
 
-    private fun clear() {
-        calculatorRepository.clear()
-
-    }
-
-    private fun deleteLastElement() {
-        calculatorRepository.delete()
-    }
-
-    private fun percent() {
-        calculatorRepository.addPercent()
-    }
-
-    private fun plus() {
-        calculatorRepository.addPlus()
-    }
-
-    private fun minus() {
-        calculatorRepository.addMinus()
-    }
-
-    private fun division() {
-        calculatorRepository.addDivision()
-    }
-
-    private fun dot() {
-        calculatorRepository.addDot()
-    }
-
-    private fun multiply() {
-        calculatorRepository.addMultiply()
-    }
 
     private fun result() {
         viewModelScope.launch {
@@ -79,7 +45,7 @@ class CalculatorViewModel @Inject constructor(
                 val expression = calculatorRepository.getResult()
                 val formattedExpression = String.format("%.2f", expression)
                 setExpression(formattedExpression)
-            } catch (e: ArithmeticalException) {
+            } catch (e: CalculatorArithmeticalException) {
                 _state.update {
                     it.copy(errorMessage = e.messageResId)
                 }
@@ -89,16 +55,19 @@ class CalculatorViewModel @Inject constructor(
 
     fun onButtonClick(text: String) {
         when (text) {
-            ButtonText.C.action -> clear()
-            ButtonText.Del.action -> deleteLastElement()
-            ButtonText.PERCENT.action -> percent()
-//            ButtonText.SWITCH -> TODO()
-            ButtonText.PLUS.action -> plus()
-            ButtonText.MINUS.action -> minus()
-            ButtonText.DIVISION.action -> division()
-            ButtonText.DOT.action -> dot()
-            ButtonText.RESULT.action -> result()
-            ButtonText.MULTIPLY.action -> multiply()
+            CalculatorButtons.LEFT_PARENTHESIS.text -> calculatorRepository.addLeftParenthesis()
+            CalculatorButtons.RIGHT_PARENTHESIS.text -> calculatorRepository.addRightParenthesis()
+            CalculatorButtons.EXPONENTIATION.text -> calculatorRepository.addExponentiation()
+            CalculatorButtons.MARK.text -> calculatorRepository.addMark()
+            CalculatorButtons.C.text -> calculatorRepository.clear()
+            CalculatorButtons.Del.text -> calculatorRepository.delete()
+            CalculatorButtons.PERCENT.text -> calculatorRepository.addPercent()
+            CalculatorButtons.PLUS.text -> calculatorRepository.addPlus()
+            CalculatorButtons.MINUS.text -> calculatorRepository.addMinus()
+            CalculatorButtons.DIVISION.text -> calculatorRepository.addDivision()
+            CalculatorButtons.DOT.text -> calculatorRepository.addDot()
+            CalculatorButtons.RESULT.text -> result()
+            CalculatorButtons.MULTIPLY.text -> calculatorRepository.addMultiply()
         }
     }
 }

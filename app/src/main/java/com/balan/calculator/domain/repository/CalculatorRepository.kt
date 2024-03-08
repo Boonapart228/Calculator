@@ -12,8 +12,11 @@ interface CalculatorRepository {
     fun delete()
 
     fun addPercent()
+
     fun addPlus()
+
     fun addMinus()
+
     fun addDivision()
 
     fun addDot()
@@ -21,4 +24,10 @@ interface CalculatorRepository {
     fun addMultiply()
 
     fun getResult(): Double
+
+    fun addRightParenthesis()
+    fun addLeftParenthesis()
+    fun addExponentiation()
+    fun addMark()
+
 }

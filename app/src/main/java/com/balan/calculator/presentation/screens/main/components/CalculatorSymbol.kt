@@ -1,5 +1,7 @@
 package com.balan.calculator.presentation.screens.main.components
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -15,6 +17,7 @@ import com.balan.calculator.ui.theme.LocalDimen
 import com.balan.calculator.ui.theme.Turquoise
 
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CalculatorSymbol(action: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Box(modifier.fillMaxWidth()) {
@@ -22,7 +25,11 @@ fun CalculatorSymbol(action: String, onClick: () -> Unit, modifier: Modifier = M
             onClick = onClick,
             Modifier
                 .fillMaxWidth()
-                .padding(LocalDimen.current.buttonPadding),
+                .padding(LocalDimen.current.buttonPadding)
+                .combinedClickable(
+                    onClick = onClick,
+                    onLongClick = onClick
+                ),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Turquoise,
                 contentColor = Color.White

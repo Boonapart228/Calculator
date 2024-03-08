@@ -54,6 +54,9 @@ android {
 }
 
 dependencies {
+    //mxParser
+    implementation("org.mariuszgromada.math:MathParser.org-mXparser:5.2.1")
+
     //Hilt
     implementation("com.google.dagger:hilt-android:2.48")
     kapt("com.google.dagger:hilt-android-compiler:2.48")
