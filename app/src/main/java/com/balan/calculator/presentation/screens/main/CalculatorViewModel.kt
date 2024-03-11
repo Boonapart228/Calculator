@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.balan.calculator.domain.model.CalculatorButtons
 import com.balan.calculator.domain.repository.CalculatorRepository
-import com.balan.calculator.presentation.exeption.CalculatorArithmeticalException
+import com.balan.calculator.presentation.exception.CalculatorArithmeticalException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
