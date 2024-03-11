@@ -18,8 +18,8 @@ class CalculatorRepositoryImpl : CalculatorRepository {
         const val DOT = '.'
         const val MULTIPLY = '*'
         const val ARITHMETICAL_FORMAT = "%.2f"
-        const val LEFT_PARENTHESIS = '('
-        const val RIGHT_PARENTHESIS = ')'
+        const val LEFT_BRACKET = '('
+        const val RIGHT_BRACKET = ')'
         const val EXPONENTIATION = "^"
     }
 
@@ -54,11 +54,11 @@ class CalculatorRepositoryImpl : CalculatorRepository {
         val isSymbol = isLastDigitOrOperator()
         when (symbol) {
             CalculatorButtons.LEFT_PARENTHESIS.text -> {
-                expression.value += LEFT_PARENTHESIS
+                expression.value += LEFT_BRACKET
             }
 
             CalculatorButtons.RIGHT_PARENTHESIS.text -> {
-                expression.value += RIGHT_PARENTHESIS
+                expression.value += RIGHT_BRACKET
             }
 
             CalculatorButtons.EXPONENTIATION.text -> {
@@ -104,14 +104,9 @@ class CalculatorRepositoryImpl : CalculatorRepository {
     }
 
     private fun isLastDigitOrOperator(): Boolean {
-        return if (expression.value.isNotEmpty()) {
-            if((expression.value.last() == LEFT_PARENTHESIS) or (expression.value.last() == RIGHT_PARENTHESIS)){
-                true
-            }else{
-                expression.value.last().isDigit()
-            }
-        } else {
-            false
-        }
+        if (expression.value.isEmpty()) return false
+        val lastChar = expression.value.last()
+        if (lastChar == LEFT_BRACKET || lastChar == RIGHT_BRACKET) return true
+        return lastChar.isDigit()
     }
 }
