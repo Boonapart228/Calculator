@@ -1,6 +1,6 @@
-package com.balan.calculator.domain.model
+package com.balan.calculator.presentation.screens.calculator_symbols
 
-val buttonsText = listOf(
+val calculatorSymbols = listOf(
     "C",
     "Del",
     "%",

@@ -1,6 +1,4 @@
 <resources>
     <string name="app_name">Calculator</string>
-    <string name="division_by_zero_error">Ділення на нуль неможливе</string>
-    <string name="operation_error">Невідомий оператор</string>
     <string name="arithmetical_error">Арифметична помилка</string>
 </resources>

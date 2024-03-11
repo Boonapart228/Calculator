@@ -10,11 +10,11 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-class NumericModule {
+class CalculatorModule {
 
     @Provides
     @Singleton
-    fun provideNumericRepository(): CalculatorRepository {
+    fun provideCalculatorRepository(): CalculatorRepository {
         return CalculatorRepositoryImpl()
     }
 }

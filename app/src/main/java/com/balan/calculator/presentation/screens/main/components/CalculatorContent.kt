@@ -19,7 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.core.text.isDigitsOnly
-import com.balan.calculator.domain.model.buttonsText
+import com.balan.calculator.presentation.screens.calculator_symbols.calculatorSymbols
 import com.balan.calculator.ui.theme.Background
 import com.balan.calculator.ui.theme.LocalDimen
 import com.balan.calculator.ui.theme.LocalProperty
@@ -61,7 +61,7 @@ fun CalculatorContent(
         Spacer(modifier = Modifier.padding(top = LocalDimen.current.spaceBetween))
 
         LazyVerticalGrid(columns = GridCells.Fixed(count = LocalProperty.current.columnCount)) {
-            items(buttonsText) { element ->
+            items(calculatorSymbols) { element ->
                 if (element.isDigitsOnly()) {
                     CalculatorNumber(number = element, onClick = { onNumberClick(element) })
                 } else {

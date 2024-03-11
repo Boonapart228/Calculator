@@ -7,27 +7,9 @@ interface CalculatorRepository {
 
     fun getExpression(): Flow<String>
 
-    fun clear()
+    fun calculate()
 
-    fun delete()
 
-    fun addPercent()
-
-    fun addPlus()
-
-    fun addMinus()
-
-    fun addDivision()
-
-    fun addDot()
-
-    fun addMultiply()
-
-    fun getResult(): Double
-
-    fun addRightParenthesis()
-    fun addLeftParenthesis()
-    fun addExponentiation()
-    fun addMark()
+    fun calculatorAction(symbol : String)
 
 }

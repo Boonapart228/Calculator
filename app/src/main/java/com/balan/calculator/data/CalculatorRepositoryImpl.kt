@@ -1,6 +1,7 @@
 package com.balan.calculator.data
 
 import com.balan.calculator.R
+import com.balan.calculator.domain.model.CalculatorButtons
 import com.balan.calculator.domain.repository.CalculatorRepository
 import com.balan.calculator.presentation.exeption.CalculatorArithmeticalException
 import kotlinx.coroutines.flow.Flow
@@ -16,7 +17,6 @@ class CalculatorRepositoryImpl : CalculatorRepository {
         const val DIVISION = '/'
         const val DOT = '.'
         const val MULTIPLY = '*'
-        const val COUNT_ELEMENT = 1
         const val ARITHMETICAL_FORMAT = "%.2f"
         const val LEFT_PARENTHESIS = "("
         const val RIGHT_PARENTHESIS = ")"
@@ -30,73 +30,75 @@ class CalculatorRepositoryImpl : CalculatorRepository {
 
     override fun getExpression(): Flow<String> = expression
 
-    override fun clear() {
-        expression.value = ""
-    }
-
-    override fun delete() {
-        expression.value = expression.value.dropLast(COUNT_ELEMENT)
-    }
-
-    override fun addPercent() {
-        val symbol = isLastDigitOrOperator()
-        if (symbol) expression.value += PERCENT
-    }
-
-    override fun addPlus() {
-        val symbol = isLastDigitOrOperator()
-        if (symbol) expression.value += PLUS
-    }
-
-    override fun addMinus() {
-        val symbol = isLastDigitOrOperator()
-        if (symbol) expression.value += MINUS
-    }
-
-    override fun addDivision() {
-        val symbol = isLastDigitOrOperator()
-        if (symbol) expression.value += DIVISION
-    }
-
-    override fun addDot() {
-        val symbol = isLastDigitOrOperator()
-        if (symbol) expression.value += DOT
-    }
-
-    override fun addMultiply() {
-        val symbol = isLastDigitOrOperator()
-        if (symbol) expression.value += MULTIPLY
-    }
-
-    override fun getResult(): Double {
+    override fun calculate() {
         val result = Expression(expression.value).calculate()
         if (result.isNaN()) {
             throw CalculatorArithmeticalException(R.string.arithmetical_error)
         }
         expression.value = String.format(ARITHMETICAL_FORMAT, result)
-        return result
     }
 
-    override fun addRightParenthesis() {
-        expression.value += RIGHT_PARENTHESIS
-    }
-
-    override fun addLeftParenthesis() {
-        expression.value += LEFT_PARENTHESIS
-    }
-
-    override fun addExponentiation() {
-        val symbol = isLastDigitOrOperator()
-        if (symbol) expression.value += EXPONENTIATION
-    }
-
-    override fun addMark() {
+    private fun addMark() {
         if (expression.value.isNotEmpty() && expression.value.last().isDigit()) {
             val withoutLast = expression.value.dropLast(1)
-            expression.value = if (withoutLast.isNotEmpty() && withoutLast.last() == '-') {
-                withoutLast + expression.value.last()
-            } else {
-                withoutLast + "-" + expression.value.last()
+            expression.value =
+                if (withoutLast.isNotEmpty() && withoutLast.last() == MINUS) {
+                    withoutLast + expression.value.last()
+                } else {
+                    withoutLast + MINUS + expression.value.last()
+                }
+        }
+    }
+
+    override fun calculatorAction(symbol: String) {
+        val isSymbol = isLastDigitOrOperator()
+        when (symbol) {
+            CalculatorButtons.LEFT_PARENTHESIS.text -> {
+                expression.value += LEFT_PARENTHESIS
+            }
+
+            CalculatorButtons.RIGHT_PARENTHESIS.text -> {
+                expression.value += RIGHT_PARENTHESIS
+            }
+
+            CalculatorButtons.EXPONENTIATION.text -> {
+                if (isSymbol) expression.value += EXPONENTIATION
+            }
+
+            CalculatorButtons.MARK.text -> {
+                addMark()
+            }
+
+            CalculatorButtons.C.text -> {
+                expression.value = ""
+            }
+
+            CalculatorButtons.Del.text -> {
+                expression.value = expression.value.dropLast(1)
+            }
+
+            CalculatorButtons.PERCENT.text -> {
+                if (isSymbol) expression.value += PERCENT
+            }
+
+            CalculatorButtons.PLUS.text -> {
+                if (isSymbol) expression.value += PLUS
+            }
+
+            CalculatorButtons.MINUS.text -> {
+                if (isSymbol) expression.value += MINUS
+            }
+
+            CalculatorButtons.DIVISION.text -> {
+                if (isSymbol) expression.value += DIVISION
+            }
+
+            CalculatorButtons.DOT.text -> {
+                if (isSymbol) expression.value += DOT
+            }
+
+            CalculatorButtons.MULTIPLY.text -> {
+                if (isSymbol) expression.value += MULTIPLY
             }
         }
     }
